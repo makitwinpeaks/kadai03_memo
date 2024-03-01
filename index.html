@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>myMemoPad</title>
+    <script src="js/jquery-2.1.3.min.js"></script>
+    <link rel="stylesheet" href="css/sample.css">
+</head>
+
+<style>
+    .note {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin: 10px;
+      width: 200px;
+      height: 100px;
+      resize: both;
+      overflow: auto;
+      float: left;
+    }
+    p {
+        font-size: 30px;
+    }
+
+    button {
+        font-size: 30px;
+    }
+
+    .fusen {
+        text-align: center;
+     }
+  </style>
+
+
+
+<body>
+    <div class=fusen>
+        <h1>My Task</h1>
+        <div id="notes-container"></div>
+        <textarea id="new-note" placeholder="新規タスクを記載"></textarea>
+        <button onclick="addNote()">保存</button>
+        <p>※削除は付箋をクリック</p>
+    </div>
+
+    <script>
+      function addNote() {
+        //入力された内容を代入
+        let newNoteText = $("#new-note").val();
+        
+        //新規タスクが記載されていたら保存する
+        
+        //keyとなる日時を取得。new Dateの後に年月日時間を取得する。
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = now.getMonth()+1;
+            var day = now.getDate();
+            var hour = now.getHours() ;	// 時
+            var minute = now.getMinutes() ;	// 分
+            var second = now.getSeconds() ;	// 秒
+        //キーとなるnoteIdを定義。
+            var noteId = year+'年'+month+'月'+day+'日'+hour+'時'+minute+'分'+second+'秒';
+            console.log(noteId); 
+        
+
+        //記載内容を表示するdivタグ（id=noteId）を作成
+            let noteHtml =
+           '<div id="' + noteId + '" class="note">' + newNoteText + '</div>';
+        //付箋を追加表示
+            $("#notes-container").append(noteHtml);
+    
+        //// localstorageに保存////
+           
+        //localstorageに保存されている配列を取得→→→これはキーに値を１ついれるだけなら不要。pushする必要がないから。
+        // let notes = JSON.parse(localStorage.getItem('notes'))|| [];
+        // notes.push({ id: noteId, text: newNoteText });→→→上記通り、pushする必要がないので、不要。
+                
+        //追加した後にlocalstorageに保存
+            localStorage.setItem(noteId, JSON.stringify(newNoteText));
+        //テキストエリアをクリア
+            $('#new-note').val('');
+            
+        
+      };
+    
+    //   // ページ読み込み時に保存された付箋を表示
+    //   $(document).ready(function () {
+    //     // //rocalstorageから保存されていた記載内容を取得
+    //     // let storedNotes = JSON.parse(localStorage.getItem(noteId)) || [];
+    //     // //objectから順番にプロパティを取得
+        
+    //     // //for (let i = 0; i < storedNotes.length; i++) {
+    //     //     for (let i = 0; i < localStorage.length; i++) {
+
+    //     //   let noteHtml = '<div id="' + storedNotes[i].id + '" class="note">' + storedNotes[i].text + '</div>';
+         
+        
+    //     for (let i = 0; i < localStorage.length; i++) {
+    // const key = localStorage.key(i);
+    // const value = localStorage.getItem(key);
+    // console.log(`${key}: ${value}`);
+
+    // let noteHtml = '<div id="' + key+ '" class="note">' + value + '</div>';
+                
+    //     //付箋を表示
+    //       $('#notes-container').append(noteHtml);
+    //     }
+    //   });
+
+    $(document).ready(function () {
+    let notesArray = [];
+
+    // ローカルストレージから全てのデータを取得し、配列に追加
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+
+    // タイムスタンプの形式を日付オブジェクトに変換できる形に変換
+        const dateParts = key.match(/(\d+)年(\d+)月(\d+)日(\d+)時(\d+)分(\d+)秒/);
+        const date = new Date(dateParts[1], dateParts[2] - 1, dateParts[3], dateParts[4], dateParts[5], dateParts[6]);
+
+        notesArray.push({ date: date, html: '<div id="' + key + '" class="note">' + value + '</div>' });
+    }
+
+    // 日付を基にソート
+    notesArray.sort(function (a, b) {
+        return a.date - b.date;
+    });
+
+    // ソートされたデータを使用してHTMLを生成
+    notesArray.forEach(function (note) {
+        // $("#notes-container").append(note.html);
+        $("#notes-container").append(note.html);
+    });
+    
+});
+
+
+    
+      
+      //付箋を削除
+      $("div").on("click",".note",function(){
+        let remove_id = $(this).attr("id"); //idの値を取得
+        console.log(remove_id);
+        $("#"+remove_id).remove();          //idの要素(付箋)を削除
+
+        localStorage.removeItem(remove_id); //localStorageも削除
+        });
+
+
+        </script>
+    </body>
+</html>
